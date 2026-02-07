@@ -13,13 +13,12 @@ __pycache__/
 static/images/*
 !static/images/.gitkeep
 
+static/logo.png
+
 # 背景图片
 static/backgroundimg/*
 !static/backgroundimg/.gitkeep
 
-# 音频文件
-static/audio/*
-!static/audio/README.txt
 
 # macOS 系统文件
 .DS_Store
