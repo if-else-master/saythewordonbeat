@@ -1,0 +1,446 @@
+/* ===== 全域樣式 ===== */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+    background-image: url('backimg.png');
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+/* ===== 遊戲容器 ===== */
+.game-container {
+    width: 100%;
+    max-width: 800px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+}
+
+/* ===== 遊戲標題 ===== */
+.game-header {
+    height: 25vh; /* 桌機預設 */
+    background-image: url('logo.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: contain;
+    padding: 8px;
+    text-align: center;
+    color: black;
+}
+
+/* 平板（≤1024px） */
+@media (max-width: 1024px) {
+    .game-header {
+        height: 22vh;
+        padding: 6px;
+        background-size: 70%;
+    }
+}
+
+/* 手機（≤768px） */
+@media (max-width: 768px) {
+    .game-header {
+        height: 20vh;
+        padding: 4px;
+        background-size: 80%;
+    }
+}
+
+/* 小手機（≤480px） */
+@media (max-width: 480px) {
+    .game-header {
+        height: 18vh;
+        background-size: 90%;
+    }
+}
+
+
+.game-header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.subtitle {
+    font-size: 1.2em;
+    opacity: 0.95;
+}
+
+/* ===== 畫面管理 ===== */
+.screen {
+    display: none;
+    padding: 40px;
+    min-height: 400px;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* ===== 歡迎畫面 ===== */
+.welcome-box {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+/* ===== 開場動畫畫面 ===== */
+.intro-container {
+    position: relative;
+    width: 100%;
+    height: 500px;
+    overflow: hidden;
+}
+
+.intro-image {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+}
+
+/* 8個方向的初始位置 */
+.intro-image[data-direction="top-left"] { top: -200px; left: -200px; }
+.intro-image[data-direction="top"] { top: -200px; left: 50%; transform: translateX(-50%); }
+.intro-image[data-direction="top-right"] { top: -200px; right: -200px; }
+.intro-image[data-direction="right"] { top: 50%; right: -200px; transform: translateY(-50%); }
+.intro-image[data-direction="bottom-right"] { bottom: -200px; right: -200px; }
+.intro-image[data-direction="bottom"] { bottom: -200px; left: 50%; transform: translateX(-50%); }
+.intro-image[data-direction="bottom-left"] { bottom: -200px; left: -200px; }
+.intro-image[data-direction="left"] { top: 50%; left: -200px; transform: translateY(-50%); }
+
+/* 滑入動畫 */
+@keyframes slideIn {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+}
+
+.intro-image.slide-in {
+    animation: slideIn 0.8s ease-out forwards;
+}
+
+/* 滑入後的最終位置 */
+.intro-image.slide-in[data-direction="top-left"] { 
+    top: 50px; left: 50px; 
+    transform: none;
+}
+.intro-image.slide-in[data-direction="top"] { 
+    top: 50px; 
+    transform: translateX(-50%);
+}
+.intro-image.slide-in[data-direction="top-right"] { 
+    top: 50px; right: 50px; 
+    transform: none;
+}
+.intro-image.slide-in[data-direction="right"] { 
+    right: 50px; 
+    transform: translateY(-50%);
+}
+.intro-image.slide-in[data-direction="bottom-right"] { 
+    bottom: 50px; right: 50px; 
+    transform: none;
+}
+.intro-image.slide-in[data-direction="bottom"] { 
+    bottom: 50px; 
+    transform: translateX(-50%);
+}
+.intro-image.slide-in[data-direction="bottom-left"] { 
+    bottom: 50px; left: 50px; 
+    transform: none;
+}
+.intro-image.slide-in[data-direction="left"] { 
+    left: 50px; 
+    transform: translateY(-50%);
+}
+
+/* 縮小消失動畫 */
+@keyframes shrinkOut {
+    0% { 
+        opacity: 1; 
+    }
+    100% { 
+        opacity: 0; 
+        transform: scale(0); 
+    }
+}
+
+.intro-image.shrink-out {
+    animation: shrinkOut 0.6s ease-in forwards;
+}
+
+/* 針對不同方向的圖片，在縮小時保持原有的transform基礎 */
+.intro-image.shrink-out[data-direction="top"],
+.intro-image.shrink-out[data-direction="bottom"] {
+    transform-origin: center center;
+}
+
+.intro-image.shrink-out[data-direction="left"],
+.intro-image.shrink-out[data-direction="right"] {
+    transform-origin: center center;
+}
+
+/* "開始" 字樣 */
+.start-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    font-size: 5em;
+    font-weight: bold;
+    color: #667eea;
+    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    z-index: 100;
+}
+
+@keyframes startTextAppear {
+    0% { 
+        opacity: 0; 
+        transform: translate(-50%, -50%) scale(0); 
+    }
+    50% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1.2); 
+    }
+    100% { 
+        opacity: 1; 
+        transform: translate(-50%, -50%) scale(1); 
+    }
+}
+
+.start-text.show {
+    animation: startTextAppear 0.8s ease-out forwards;
+}
+
+/* ===== Round 過渡畫面 ===== */
+.round-transition-box {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+.round-number {
+    font-size: 5em;
+    font-weight: bold;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: roundPulse 1s ease-in-out;
+}
+
+@keyframes roundPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        opacity: 1;
+    }
+    50% { 
+        transform: scale(1.2); 
+        opacity: 0.8;
+    }
+}
+
+/* ===== 按鈕樣式 ===== */
+.btn {
+    padding: 15px 40px;
+    font-size: 1.2em;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.btn-large {
+    padding: 25px 60px;
+    font-size: 1.8em;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+}
+
+.btn:active {
+    transform: translateY(0);
+}
+
+/* ===== 遊戲資訊列 ===== */
+.game-info {
+    display: flex;
+    justify-content: space-around;
+    margin-bottom: 30px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.info-item {
+    text-align: center;
+}
+
+.info-item .label {
+    font-weight: bold;
+    color: #667eea;
+    margin-right: 5px;
+}
+
+.info-item .value {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: #333;
+}
+
+/* 階段提示已移除 */
+
+/* ===== 8 格子網格佈局 (2x4) ===== */
+.grid-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 15px;
+}
+
+/* ===== 單一格子 ===== */
+.grid-cell {
+    position: relative;
+    aspect-ratio: 1;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 3px solid transparent;
+}
+
+/* 格子圖片 */
+.cell-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* 圖片已載入 */
+.grid-cell.loaded .cell-image {
+    opacity: 1;
+}
+
+/* 格子單字 */
+/* cell-word 已移除 */
+
+/* 格子高亮（第二輪） */
+.grid-cell.highlight {
+    border-color: #f5576c;
+    box-shadow: 0 0 20px rgba(245, 87, 108, 0.6);
+    transform: scale(1.05);
+    z-index: 10;
+}
+
+/* 格子高亮動畫 */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1.05);
+    }
+    50% {
+        transform: scale(1.1);
+    }
+}
+
+.grid-cell.highlight {
+    animation: pulse 0.5s ease-in-out;
+}
+
+/* ===== 圖片淡入效果 ===== */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ===== 節拍指示器 ===== */
+.beat-indicator {
+    width: 100%;
+    height: 10px;
+    background: #e0e0e0;
+    border-radius: 5px;
+    overflow: hidden;
+    margin-bottom: 30px;
+}
+
+.beat-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    width: 0%;
+    transition: width 0.1s linear;
+}
+
+/* 控制區域已移除 */
+
+/* ===== 完成畫面 ===== */
+.complete-box {
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+}
+
+/* ===== 響應式設計 ===== */
+@media (max-width: 600px) {
+    .game-header h1 {
+        font-size: 1.8em;
+    }
+    
+    .screen {
+        padding: 20px;
+    }
+    
+    .grid-container {
+        gap: 10px;
+        padding: 15px;
+    }
+    
+    /* cell-word 已移除 */
+    
+    .btn {
+        padding: 12px 30px;
+        font-size: 1em;
+    }
+}

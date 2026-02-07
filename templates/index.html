@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Say the Word on Beat</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- 背景音樂（隱藏） -->
+    <audio id="background-music" preload="auto">
+        <source src="{{ url_for('static', filename='audio/beat.mp3') }}" type="audio/mpeg">
+        您的瀏覽器不支援音樂播放。
+    </audio>
+
+    <div class="game-container">
+        <!-- 遊戲標題 -->
+        <header class="game-header">
+            <h1>Say the Word on Beat</h1>            
+        </header>
+
+        <!-- 開始畫面 -->
+        <div id="start-screen" class="screen active">
+            <div class="welcome-box">
+                <button id="start-btn" class="btn btn-primary btn-large">開始遊戲</button>
+            </div>
+        </div>
+
+        <!-- 開場動畫畫面 -->
+        <div id="intro-screen" class="screen">
+            <div class="intro-container">
+                <!-- 8張圖片從不同方向滑入 -->
+                <div class="intro-image" data-direction="top-left"></div>
+                <div class="intro-image" data-direction="top"></div>
+                <div class="intro-image" data-direction="top-right"></div>
+                <div class="intro-image" data-direction="right"></div>
+                <div class="intro-image" data-direction="bottom-right"></div>
+                <div class="intro-image" data-direction="bottom"></div>
+                <div class="intro-image" data-direction="bottom-left"></div>
+                <div class="intro-image" data-direction="left"></div>
+            </div>
+            <!-- "開始" 字樣 -->
+            <div class="start-text">開始！</div>
+        </div>
+
+        <!-- Round 過渡畫面 -->
+        <div id="round-transition-screen" class="screen">
+            <div class="round-transition-box">
+                <h1 id="round-transition-text" class="round-number">Round 2</h1>
+            </div>
+        </div>
+
+        <!-- 遊戲畫面 -->
+        <div id="game-screen" class="screen">
+            <!-- 遊戲資訊列 -->
+            <div class="game-info">
+                <div class="info-item">
+                    <span class="label">Round:</span>
+                    <span id="current-round" class="value">1</span>
+                    <span class="value">/</span>
+                    <span id="total-rounds" class="value">5</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">圖片:</span>
+                    <span id="current-image" class="value">0</span>
+                    <span class="value">/</span>
+                    <span id="total-images" class="value">8</span>
+                </div>
+            </div>
+
+            <!-- 8 格子佈局 (2x4) -->
+            <div class="grid-container">
+                <div class="grid-cell" data-index="0">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="1">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="2">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="3">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="4">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="5">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="6">
+                    <img class="cell-image" src="" alt="">
+                </div>
+                <div class="grid-cell" data-index="7">
+                    <img class="cell-image" src="" alt="">
+                </div>
+            </div>
+
+            <!-- 節拍指示器 -->
+            <div class="beat-indicator">
+                <div id="beat-bar" class="beat-bar"></div>
+            </div>
+        </div>
+
+        <!-- Round 完成畫面 -->
+        <div id="round-complete-screen" class="screen">
+            <div class="complete-box">
+                <h2>🎉 Round <span id="completed-round">1</span> 完成！</h2>
+                <p class="complete-message">做得好！準備好下一局了嗎？</p>
+                <button id="next-round-btn" class="btn btn-primary">下一局</button>
+            </div>
+        </div>
+
+        <!-- 遊戲結束畫面 -->
+        <div id="game-over-screen" class="screen">
+            <div class="complete-box">
+                <button id="restart-btn" class="btn btn-primary btn-large">重新開始</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{{ url_for('static', filename='game.js') }}"></script>
+</body>
+</html>
