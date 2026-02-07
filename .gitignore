@@ -20,8 +20,12 @@ static/backgroundimg/*
 !static/backgroundimg/.gitkeep
 
 
-# macOS 系统文件
+# macOS 系统文件（所有文件夹）
 .DS_Store
+**/.DS_Store
+.AppleDouble
+.LSOverride
+._*
 
 # IDE 配置文件
 .vscode/
