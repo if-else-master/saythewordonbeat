@@ -1,16 +1,37 @@
+# Python 虚拟环境
 .venv/
+venv/
+env/
+
+# Python 编译文件
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
-*.pyw
-*.pyz
-*.pywz
-*.pyzw
-*.pyzwz
-*.pyzwzw
-*.pyzwzwz
-*.pyzwzwzw
-*.pyzwzwzwz
-static/images/
-static/backimg.png/
+
+# 图片文件夹（不上传用户图片）
+static/images/*
+!static/images/.gitkeep
+
+# 背景图片
+static/backgroundimg/*
+!static/backgroundimg/.gitkeep
+
+# 音频文件
+static/audio/*
+!static/audio/README.txt
+
+# macOS 系统文件
+.DS_Store
+
+# IDE 配置文件
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# 日志文件
+*.log
+
+# 环境变量文件
+.env
