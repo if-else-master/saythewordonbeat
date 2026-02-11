@@ -19,12 +19,25 @@
             <h1>Say the Word on Beat</h1>            
         </header>
 
-        <!-- 開始畫面 -->
-        <div id="start-screen" class="screen active">
-            <div class="welcome-box">
-                <button id="start-btn" class="btn btn-primary btn-large">開始遊戲</button>
+    <!-- 開始畫面 -->
+    <div id="start-screen" class="screen active">
+        <div class="welcome-box">
+            <button id="start-btn" class="btn btn-primary btn-large">開始遊戲</button>
+            
+            <!-- 速度選擇 -->
+            <div class="speed-selector">
+                <p class="speed-label">選擇速度：</p>
+                <div class="speed-buttons">
+                    <button id="speed-normal" class="btn btn-speed" data-speed="1.0">
+                        正常速度
+                    </button>
+                    <button id="speed-slow" class="btn btn-speed active" data-speed="0.5">
+                        放慢 0.5 倍
+                    </button>
+                </div>
             </div>
         </div>
+    </div>
 
         <!-- 開場動畫畫面 -->
         <div id="intro-screen" class="screen">
@@ -72,27 +85,35 @@
             <div class="grid-container">
                 <div class="grid-cell" data-index="0">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="1">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="2">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="3">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="4">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="5">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="6">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
                 <div class="grid-cell" data-index="7">
                     <img class="cell-image" src="" alt="">
+                    <div class="cell-filename"></div>
                 </div>
             </div>
 

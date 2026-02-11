@@ -17,7 +17,8 @@ const GameState = {
     isMusicPlaying: false,    // 音樂是否正在播放
     isMuted: false,           // 是否靜音
     phase: 1,                 // 遊戲階段 (1=展示圖片, 2=高亮提示)
-    gridCells: []             // 格子DOM元素陣列
+    gridCells: [],            // 格子DOM元素陣列
+    selectedSpeed: 0.5        // 選擇的速度（預設 0.5 倍）
 };
 
 // ===== DOM 元素 =====
@@ -34,6 +35,8 @@ const Elements = {
     startBtn: document.getElementById('start-btn'),
     nextRoundBtn: document.getElementById('next-round-btn'),
     restartBtn: document.getElementById('restart-btn'),
+    speedNormalBtn: document.getElementById('speed-normal'),
+    speedSlowBtn: document.getElementById('speed-slow'),
     
     // 遊戲資訊
     currentRound: document.getElementById('current-round'),
@@ -63,14 +66,21 @@ const Elements = {
 async function init() {
     console.log('🎮 初始化遊戲...');
     
-    // 從後端獲取遊戲資料
+    // 從後端獲取遊戲資料（使用預設速度）
+    await loadGameData(GameState.selectedSpeed);
+    
+    console.log('✅ 遊戲初始化完成');
+}
+
+// ===== 載入遊戲資料 =====
+async function loadGameData(speed) {
     try {
-        const response = await fetch('/api/game-data');
+        const response = await fetch(`/api/game-data?speed=${speed}`);
         GameState.gameData = await response.json();
         GameState.phase1Interval = GameState.gameData.phase1Interval;
         GameState.phase2Interval = GameState.gameData.phase2Interval;
         
-        console.log('✅ 遊戲資料載入成功:', GameState.gameData);
+        console.log(`✅ 遊戲資料載入成功（速度: ${speed}x）:`, GameState.gameData);
         console.log(`⏱️  第一階段: ${GameState.phase1Interval}ms/張, 第二階段: ${GameState.phase2Interval}ms/張`);
         
         // 設定總回合數
@@ -93,8 +103,8 @@ async function init() {
     Elements.startBtn.addEventListener('click', startGame);
     Elements.nextRoundBtn.addEventListener('click', nextRound);
     Elements.restartBtn.addEventListener('click', restartGame);
-    
-    console.log('✅ 遊戲初始化完成');
+    Elements.speedNormalBtn.addEventListener('click', () => selectSpeed(1.0));
+    Elements.speedSlowBtn.addEventListener('click', () => selectSpeed(0.5));
 }
 
 // ===== 初始化格子 =====
@@ -118,6 +128,12 @@ function initMusic() {
     // 設定音樂屬性
     GameState.music.volume = 0.5;  // 音量 50%
     GameState.music.loop = false;   // 不循環播放
+    
+    // 設定播放速度（如果有設定的話）
+    if (GameState.gameData?.music?.playbackRate) {
+        GameState.music.playbackRate = GameState.gameData.music.playbackRate;
+        console.log(`🎵 音樂播放速度: ${GameState.music.playbackRate}x (${GameState.music.playbackRate === 0.5 ? '放慢 0.5 倍' : '正常'})`);
+    }
     
     // 監聽音樂事件
     GameState.music.addEventListener('ended', () => {
@@ -219,8 +235,11 @@ async function playIntroAnimation() {
         }
     });
     
-    // 等待100ms後開始滑入動畫
-    await sleep(100);
+    // 根據速度計算動畫時長
+    const speedMultiplier = 1.0 / GameState.selectedSpeed;
+    
+    // 等待後開始滑入動畫
+    await sleep(100 * speedMultiplier);
     
     // 隨機順序播放滑入動畫
     const indices = [0, 1, 2, 3, 4, 5, 6, 7];
@@ -228,25 +247,25 @@ async function playIntroAnimation() {
     
     for (let i = 0; i < indices.length; i++) {
         Elements.introImages[indices[i]].classList.add('slide-in');
-        await sleep(100); // 每張圖片間隔100ms
+        await sleep(100 * speedMultiplier); // 每張圖片間隔（根據速度調整）
     }
     
-    // 停留2秒
-    await sleep(2000);
+    // 停留時間（根據速度調整）
+    await sleep(2000 * speedMultiplier);
     
     // 所有圖片縮小消失
     Elements.introImages.forEach(img => {
         img.classList.add('shrink-out');
     });
     
-    // 等待縮小動畫完成
-    await sleep(600);
+    // 等待縮小動畫完成（根據速度調整）
+    await sleep(600 * speedMultiplier);
     
     // 顯示"開始"字樣
     Elements.startText.classList.add('show');
     
-    // 停留0.8秒
-    await sleep(800);
+    // 停留時間（根據速度調整）
+    await sleep(800 * speedMultiplier);
     
     // 清理動畫類
     Elements.introImages.forEach(img => {
@@ -267,8 +286,9 @@ async function showRoundTransition(roundNumber) {
     // 顯示過渡畫面
     showScreen(Elements.roundTransitionScreen);
     
-    // 停留1秒
-    await sleep(1000);
+    // 停留時間（根據速度調整）
+    const speedMultiplier = 1.0 / GameState.selectedSpeed;
+    await sleep(1000 * speedMultiplier);
     
     console.log('✅ Round 過渡完成');
 }
@@ -356,16 +376,17 @@ function startRound() {
     // 清空所有格子
     clearAllCells();
     
-    // 每局重新播放音樂，並在音樂開始後延遲 0.65 秒再啟動遊戲
+    // 每局重新播放音樂，並在音樂開始後延遲再啟動遊戲
     playMusic(() => {
-        console.log('⏳ 等待 0.65 秒後開始...');
+        const startDelay = GameState.gameData.music.startDelay * 1000;  // 秒轉毫秒
+        console.log(`⏳ 等待 ${startDelay}ms 後開始...`);
         
-        // 延遲 0.65 秒後才啟動遊戲（配合音樂）
+        // 延遲後才啟動遊戲（配合音樂）
         setTimeout(() => {
             GameState.isPlaying = true;
-            console.log('🎮 遊戲開始（延遲 0.65 秒後）');
+            console.log(`🎮 遊戲開始（延遲 ${startDelay}ms 後）`);
             showNextImage();
-        }, 650);  // 延遲 650ms = 0.65 秒
+        }, startDelay);
     });
 }
 
@@ -374,7 +395,11 @@ function clearAllCells() {
     GameState.gridCells.forEach(cell => {
         cell.classList.remove('loaded', 'highlight');
         const img = cell.querySelector('.cell-image');
+        const filename = cell.querySelector('.cell-filename');
         img.src = '';
+        if (filename) {
+            filename.textContent = '';
+        }
     });
 }
 
@@ -433,10 +458,18 @@ function showNextImage() {
 function displayImageInCell(index, imageData) {
     const cell = GameState.gridCells[index];
     const img = cell.querySelector('.cell-image');
+    const filename = cell.querySelector('.cell-filename');
     
     // 設定圖片
     img.src = `/static/images/${imageData.filename}`;
     img.alt = imageData.word;
+    
+    // 設定檔案名稱（去除副檔名）
+    if (filename) {
+        // 從 filename 中提取檔名並去除副檔名
+        const nameWithoutExt = imageData.filename.replace(/\.[^/.]+$/, '');
+        filename.textContent = nameWithoutExt;
+    }
     
     // 加入載入完成的樣式
     cell.classList.add('loaded');
@@ -524,28 +557,45 @@ function completeRound() {
     GameState.isPlaying = false;
     clearTimeout(GameState.beatTimer);
     
-    // 停止當前 Round 的音樂
-    stopMusic();
-    
     // 重置進度條
     Elements.beatBar.style.width = '0%';
     
-    // 檢查是否完成所有 round
-    if (GameState.currentRound >= GameState.gameData.totalRounds - 1) {
-        // 遊戲結束
-        gameOver();
-    } else {
-        // 檢查是否自動進入下一局
-        if (GameState.gameData.autoNextRound) {
-            // 自動進入下一局
-            const delay = GameState.gameData.autoNextDelay || 500;
-            console.log(`⏭️  ${delay}ms 後自動進入下一局...`);
+    // 根據速度決定是否等待音樂播完
+    if (GameState.selectedSpeed === 0.3) {
+        // 放慢 0.5 倍版本：等待音樂播完
+        const musicRemainingTime = GameState.music ? 
+            (GameState.gameData.music.duration * 1000 - GameState.music.currentTime * 1000) : 0;
+        
+        console.log(`🎵 音樂剩餘時間: ${musicRemainingTime.toFixed(0)}ms（等待播完）`);
+        
+        const waitTime = Math.max(0, musicRemainingTime);
+        
+        setTimeout(() => {
+            // 停止音樂
+            stopMusic();
             
-            setTimeout(() => {
+            // 檢查是否完成所有 round
+            if (GameState.currentRound >= GameState.gameData.totalRounds - 1) {
+                gameOver();
+            } else if (GameState.gameData.autoNextRound) {
+                console.log(`⏭️  音樂播完，進入下一局（過渡時間 500ms）`);
                 nextRound();
-            }, delay);
+            } else {
+                Elements.completedRound.textContent = roundNum;
+                showScreen(Elements.roundCompleteScreen);
+            }
+        }, waitTime);
+    } else {
+        // 正常速度：立即停止音樂並進入下一局
+        stopMusic();
+        
+        // 檢查是否完成所有 round
+        if (GameState.currentRound >= GameState.gameData.totalRounds - 1) {
+            gameOver();
+        } else if (GameState.gameData.autoNextRound) {
+            console.log(`⏭️  立即進入下一局（過渡時間 500ms）`);
+            nextRound();
         } else {
-            // 顯示 Round 完成畫面（需手動點擊）
             Elements.completedRound.textContent = roundNum;
             showScreen(Elements.roundCompleteScreen);
         }
@@ -578,6 +628,33 @@ function gameOver() {
     
     // 顯示遊戲結束畫面
     showScreen(Elements.gameOverScreen);
+}
+
+// ===== 選擇速度 =====
+async function selectSpeed(speed) {
+    console.log(`⚙️  選擇速度: ${speed}x`);
+    
+    // 更新選中狀態
+    GameState.selectedSpeed = speed;
+    
+    // 更新 CSS 變數（animation-speed = 1 / speed）
+    const animationSpeed = 1.0 / speed;
+    document.documentElement.style.setProperty('--animation-speed', animationSpeed);
+    console.log(`🎨 CSS動畫速度設為: ${animationSpeed}x`);
+    
+    // 更新按鈕樣式
+    if (speed === 1.0) {
+        Elements.speedNormalBtn.classList.add('active');
+        Elements.speedSlowBtn.classList.remove('active');
+    } else {
+        Elements.speedNormalBtn.classList.remove('active');
+        Elements.speedSlowBtn.classList.add('active');
+    }
+    
+    // 重新載入遊戲資料
+    await loadGameData(speed);
+    
+    console.log(`✅ 已切換至 ${speed}x 速度`);
 }
 
 // ===== 重新開始 =====

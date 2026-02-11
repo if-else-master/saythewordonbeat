@@ -1,4 +1,8 @@
 /* ===== 全域樣式 ===== */
+:root {
+    --animation-speed: 2.0;  /* 預設放慢 2 倍 (speed=0.5) */
+}
+
 * {
     margin: 0;
     padding: 0;
@@ -91,9 +95,62 @@ body {
 .welcome-box {
     text-align: center;
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
-    min-height: 400px;
+    width: 100%;
+    height: 100%;
+    gap: 40px;
+}
+
+/* 速度選擇器 */
+.speed-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.speed-label {
+    font-size: 1.3em;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.5);
+    margin: 0;
+}
+
+.speed-buttons {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.btn-speed {
+    padding: 15px 35px;
+    font-size: 1.2em;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+}
+
+.btn-speed:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.8);
+    transform: translateY(-2px);
+}
+
+.btn-speed.active {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    border-color: #f5576c;
+    box-shadow: 0 4px 20px rgba(245, 87, 108, 0.6);
+    transform: scale(1.05);
+}
+
+.btn-speed.active:hover {
+    transform: scale(1.08) translateY(-2px);
 }
 
 /* ===== 開場動畫畫面 ===== */
@@ -132,7 +189,7 @@ body {
 }
 
 .intro-image.slide-in {
-    animation: slideIn 0.8s ease-out forwards;
+    animation: slideIn calc(0.8s * var(--animation-speed)) ease-out forwards;
 }
 
 /* 滑入後的最終位置 */
@@ -181,7 +238,7 @@ body {
 }
 
 .intro-image.shrink-out {
-    animation: shrinkOut 0.6s ease-in forwards;
+    animation: shrinkOut calc(0.6s * var(--animation-speed)) ease-in forwards;
 }
 
 /* 針對不同方向的圖片，在縮小時保持原有的transform基礎 */
@@ -197,14 +254,14 @@ body {
 
 /* "開始" 字樣 */
 .start-text {
-    position: absolute;
+    position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0);
-    font-size: 5em;
+    font-size: 8em;
     font-weight: bold;
-    color: #667eea;
-    text-shadow: 3px 3px 10px rgba(0, 0, 0, 0.3);
+    color: white;
+    text-shadow: 4px 4px 20px rgba(0, 0, 0, 0.5);
     opacity: 0;
     z-index: 100;
 }
@@ -225,7 +282,7 @@ body {
 }
 
 .start-text.show {
-    animation: startTextAppear 0.8s ease-out forwards;
+    animation: startTextAppear calc(0.8s * var(--animation-speed)) ease-out forwards;
 }
 
 /* ===== Round 過渡畫面 ===== */
@@ -244,7 +301,7 @@ body {
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    animation: roundPulse 1s ease-in-out;
+    animation: roundPulse calc(1s * var(--animation-speed)) ease-in-out;
 }
 
 @keyframes roundPulse {
@@ -357,6 +414,30 @@ body {
     opacity: 1;
 }
 
+/* 檔案名稱顯示 */
+.cell-filename {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.3);  /* 透明黑色背景 */
+    backdrop-filter: blur(5px);  /* 毛玻璃效果 */
+    color: white;
+    font-size: 0.9em;
+    font-weight: bold;
+    text-align: center;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    word-break: break-all;  /* 長檔名換行 */
+}
+
+/* 圖片載入後顯示檔名 */
+.grid-cell.loaded .cell-filename {
+    opacity: 1;
+}
+
 /* 格子單字 */
 /* cell-word 已移除 */
 
@@ -379,7 +460,7 @@ body {
 }
 
 .grid-cell.highlight {
-    animation: pulse 0.5s ease-in-out;
+    animation: pulse calc(0.5s * var(--animation-speed)) ease-in-out;
 }
 
 /* ===== 圖片淡入效果 ===== */
@@ -422,6 +503,21 @@ body {
     min-height: 400px;
 }
 
+/* ===== 響應式設計：檔案名稱 ===== */
+@media (max-width: 768px) {
+    .cell-filename {
+        font-size: 0.8em;
+        padding: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .cell-filename {
+        font-size: 0.7em;
+        padding: 4px;
+    }
+}
+
 /* ===== 響應式設計 ===== */
 @media (max-width: 600px) {
     .game-header h1 {
@@ -437,7 +533,10 @@ body {
         padding: 15px;
     }
     
-    /* cell-word 已移除 */
+    .cell-filename {
+        font-size: 0.75em;
+        padding: 5px;
+    }
     
     .btn {
         padding: 12px 30px;

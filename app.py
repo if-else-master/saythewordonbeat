@@ -5,7 +5,7 @@ Say the Word on Beat - Flask 後端
 提供圖片清單與 API 端點
 """
 
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import os
 import random
 
@@ -51,8 +51,12 @@ def get_game_data():
     - 總共 5 局
     - 每局 8 張圖片
     - 隨機排列，盡量讓每張圖片都被使用
+    - 支援速度參數：speed=1.0（正常）或 speed=0.5（放慢）
     """
     global SHUFFLED_IMAGES
+    
+    # 獲取速度參數（預設 0.5）
+    speed = float(request.args.get('speed', 0.5))
     
     # 獲取所有圖片
     all_images = get_all_images()
@@ -101,20 +105,60 @@ def get_game_data():
         image_names = [img['filename'] for img in round_images]
         print(f"Round {i}: {', '.join(image_names)}")
     
+    # 計算精確的時間配置
+    # 音樂總長：5.4秒
+    # 遊戲開始延遲：0.65秒
+    # 實際遊戲時間：5.4 - 0.65 = 4.75秒
+    # 兩個階段各一半：4.75 / 2 = 2.375秒
+    # 每張圖片間隔：2375ms / 8 = 296.875ms ≈ 297ms
+    
+    # 放慢 0.5 倍 = 速度變為 50%，時間變為 2 倍
+    # 根據速度計算時間配置
+    # 基礎配置（正常速度 speed=1.0）
+    base_phase_interval = 297  # ms
+    base_music_duration = 5.4  # 秒
+    base_start_delay = 0.65    # 秒
+    
+    # 計算實際配置（speed 越小，時間越長）
+    speed_multiplier = 1.0 / speed  # speed=0.5 時，multiplier=2.0
+    
+    phase_interval = int(base_phase_interval * speed_multiplier)
+    music_duration = base_music_duration * speed_multiplier
+    
+    # 調整開始延遲：速度越慢，相對需要更長的延遲來對齊節拍
+    # 但是如果慢半拍，需要減少延遲
+    if speed == 0.5:
+        # 放慢版本：減少延遲，讓遊戲提前半拍開始
+        start_delay = base_start_delay * speed_multiplier - (base_phase_interval * speed_multiplier / 1000.0)
+    else:
+        start_delay = base_start_delay * speed_multiplier
+    
+    phase_duration = phase_interval * 8 / 1000.0  # 轉換為秒
+    
+    # Round 間隔固定為 0，過渡時間在前端控制（總共 500ms）
+    auto_delay = 0
+    
+    print(f"\n⚙️  速度設定: {speed}x")
+    print(f"   圖片間隔: {phase_interval}ms")
+    print(f"   音樂時長: {music_duration}秒")
+    print(f"   開始延遲: {start_delay:.3f}秒 {'（已調整提前半拍）' if speed == 0.5 else ''}")
+    print(f"   Round間隔: 500ms（固定，包含過渡動畫）")
+    
     return jsonify({
         "totalRounds": 5,
         "imagesPerRound": 8,
         "rounds": rounds,
-        "phase1Interval": 285,  # 第一階段：300ms/張
-        "phase2Interval": 285,  # 第二階段：300ms/張
-        "autoNextRound": True,  # 自動進入下一局
-        "autoNextDelay": 10,  # 自動進入下一局的延遲（毫秒）- 0.5 秒快速接續
+        "phase1Interval": phase_interval,
+        "phase2Interval": phase_interval,
+        "autoNextRound": True,
+        "autoNextDelay": auto_delay,
         "music": {
             "filename": "beat.mp3",
-            "duration": 5.4,  # 音樂總長
-            "startDelay": 0.65,  # 音樂開始前延遲 0.65 秒
-            "phase1Duration": 2.39,  # 第一階段：8 × 300ms = 2400ms
-            "phase2Duration": 2.39,  # 第二階段：8 × 300ms = 2400ms
+            "duration": music_duration,
+            "startDelay": start_delay,
+            "phase1Duration": phase_duration,
+            "phase2Duration": phase_duration,
+            "playbackRate": speed,  # 直接使用速度值
             "loop": False
         }
     })
